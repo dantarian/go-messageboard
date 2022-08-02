@@ -32,6 +32,4 @@ services:
   database:
     image: postgres
     restart: always
-    environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-
+    env_file: ../.env
