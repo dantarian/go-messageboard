@@ -4,8 +4,10 @@
         "docker-compose.yml"
     ],
     "service": "vscode",
+    "remoteUser": "vscode",
     "runServices": [
-        "vscode", "database"
+        "vscode",
+        "database"
     ],
     "shutdownAction": "stopCompose",
     "postCreateCommand": "~/.windows.sh && go mod download && go mod tidy",
