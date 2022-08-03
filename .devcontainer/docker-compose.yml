@@ -6,20 +6,20 @@ services:
     volumes:
       - ../:/workspace
       # Docker
-      - ~/.docker:/root/.docker:z
+      - ~/.docker:/home/vscode/.docker:z
       # Docker socket to access Docker server
       - /var/run/docker.sock:/var/run/docker.sock
       # SSH directory for Linux, OSX and WSL
-      - ~/.ssh:/root/.ssh:z
+      - ~/.ssh:/home/vscode/.ssh:z
       # For Windows without WSL, a copy will be made
       # from /tmp/.ssh to ~/.ssh to fix permissions
       # - ~/.ssh:/tmp/.ssh:ro
       # Shell history persistence
-      - ~/.zsh_history:/root/.zsh_history:z
+      - ~/.zsh_history:/home/vscode/.zsh_history:z
       # Git config
-      - ~/.gitconfig:/root/.gitconfig:z
+      - ~/.gitconfig:/home/vscode/.gitconfig:z
       # Kubernetes
-      - ~/.kube:/root/.kube:z
+      - ~/.kube:/home/vscode/.kube:z
     environment:
       - TZ=
     cap_add:
