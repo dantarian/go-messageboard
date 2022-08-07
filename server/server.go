@@ -25,7 +25,7 @@ func NewServer(config *config.Config) *Server {
 	return &Server{config, router}
 }
 
-func RunServer(s *Server) {
+func (s *Server) Run() {
 	if err := s.router.Run(fmt.Sprintf(":%d", s.config.Server.Port)); err != nil {
 		panic(fmt.Errorf("failed to start server: %w", err))
 	}

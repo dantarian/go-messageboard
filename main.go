@@ -1,13 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"pencethren/go-messageboard/config"
 	"pencethren/go-messageboard/server"
-
-	"go.uber.org/fx"
 )
 
 func main() {
-	app := fx.New(config.Module, server.Module)
-	app.Run()
+	config, err := config.NewConfig()
+	if err != nil {
+		panic(fmt.Errorf("failed to configure application: %w", err))
+	}
+
+	s := server.NewServer(config)
+	s.Run()
 }
