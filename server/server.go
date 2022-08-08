@@ -2,7 +2,7 @@ package server
 
 import (
 	"fmt"
-	"net/http"
+	"pencethren/go-messageboard/api"
 	"pencethren/go-messageboard/config"
 
 	"github.com/gin-gonic/gin"
@@ -13,14 +13,10 @@ type Server struct {
 	router *gin.Engine
 }
 
-func NewServer(config *config.Config) *Server {
+func NewServer(config *config.Config, buildRoutes api.RouteBuilder) *Server {
 	router := gin.Default()
 
-	router.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
+	buildRoutes(router)
 
 	return &Server{config, router}
 }
