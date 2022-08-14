@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"pencethren/go-messageboard/api"
 	"pencethren/go-messageboard/config"
 	"pencethren/go-messageboard/server"
 )
@@ -13,7 +12,7 @@ func main() {
 		panic(fmt.Errorf("failed to configure application: %w", err))
 	}
 
-	s := server.NewServer(config, api.Build)
+	s := server.NewServer(config)
 
 	s.Run()
 }

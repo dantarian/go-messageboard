@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"pencethren/go-messageboard/api"
 	"pencethren/go-messageboard/config"
+	"pencethren/go-messageboard/data"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,10 +14,12 @@ type Server struct {
 	router *gin.Engine
 }
 
-func NewServer(config *config.Config, buildRoutes api.RouteBuilder) *Server {
+func NewServer(config *config.Config) *Server {
 	router := gin.Default()
 
-	buildRoutes(router)
+	pingRepo := data.NewInMemoryPingRepository()
+
+	api.ApplyRoutes(router, pingRepo)
 
 	return &Server{config, router}
 }

@@ -11,8 +11,13 @@ type serverConfig struct {
 	Port int
 }
 
+type dbConfig struct {
+	Type string
+}
+
 type Config struct {
-	Server *serverConfig
+	Server   *serverConfig
+	Database *dbConfig
 }
 
 func NewConfig() (*Config, error) {
@@ -43,6 +48,7 @@ func NewConfig() (*Config, error) {
 
 func defaults() {
 	viper.SetDefault("server.port", "8080")
+	viper.SetDefault("database.type", "memory")
 }
 
 func validate() error {

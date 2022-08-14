@@ -1,13 +1,16 @@
 package api
 
 import (
-	"pencethren/go-messageboard/api/ping"
+	"pencethren/go-messageboard/controllers"
+	"pencethren/go-messageboard/entities"
 
 	"github.com/gin-gonic/gin"
 )
 
-type RouteBuilder func(*gin.Engine)
-
-func Build(router *gin.Engine) {
-	ping.Build(router)
+func ApplyRoutes(router *gin.Engine, pingRepo entities.IPingRepository) {
+	pings := router.Group("pings")
+	{
+		pingController := controllers.NewPingsController(pingRepo)
+		pingController.ApplyRoutes(pings)
+	}
 }
