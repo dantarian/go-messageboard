@@ -14,8 +14,3 @@ type Ping struct {
 func NewPing() Ping {
 	return Ping{id: uuid.NewString(), timestamp: time.Now().UnixMicro()}
 }
-
-type IPingRepository interface {
-	Add(Ping)
-	Count() int
-}

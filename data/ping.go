@@ -1,12 +1,15 @@
 package data
 
-import "pencethren/go-messageboard/entities"
+import (
+	"pencethren/go-messageboard/entities"
+	"pencethren/go-messageboard/repositories"
+)
 
 type inMemoryPingRepository struct {
 	pings []entities.Ping
 }
 
-func NewInMemoryPingRepository() entities.IPingRepository {
+func NewInMemoryPingRepository() repositories.IPingRepository {
 	return &inMemoryPingRepository{}
 }
 

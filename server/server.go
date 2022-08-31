@@ -18,8 +18,10 @@ func NewServer(config *config.Config) *Server {
 	router := gin.Default()
 
 	pingRepo := data.NewInMemoryPingRepository()
+	boardRepo := data.NewInMemoryBoardRepository()
 
-	api.ApplyRoutes(router, pingRepo)
+	apiRouter := api.NewRouter(pingRepo, boardRepo)
+	apiRouter.ApplyRoutes(router)
 
 	return &Server{config, router}
 }

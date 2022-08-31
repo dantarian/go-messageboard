@@ -2,13 +2,14 @@ package operations
 
 import (
 	"pencethren/go-messageboard/entities"
+	"pencethren/go-messageboard/repositories"
 )
 
-func RespondToPing(pings entities.IPingRepository) string {
+func RespondToPing(pings repositories.IPingRepository) string {
 	pings.Add(entities.NewPing())
 	return "pong"
 }
 
-func CountPingsReceived(pings entities.IPingRepository) int {
+func CountPingsReceived(pings repositories.IPingRepository) int {
 	return pings.Count()
 }

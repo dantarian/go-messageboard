@@ -2,17 +2,17 @@ package controllers
 
 import (
 	"net/http"
-	"pencethren/go-messageboard/entities"
 	"pencethren/go-messageboard/operations"
+	"pencethren/go-messageboard/repositories"
 
 	"github.com/gin-gonic/gin"
 )
 
 type PingsController struct {
-	repository entities.IPingRepository
+	repository repositories.IPingRepository
 }
 
-func NewPingsController(repository entities.IPingRepository) PingsController {
+func NewPingsController(repository repositories.IPingRepository) PingsController {
 	return PingsController{repository: repository}
 }
 
