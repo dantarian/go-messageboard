@@ -2,6 +2,7 @@ package api
 
 import (
 	"pencethren/go-messageboard/controllers"
+	"pencethren/go-messageboard/operations"
 	"pencethren/go-messageboard/repositories"
 
 	"github.com/gin-gonic/gin"
@@ -22,6 +23,6 @@ func (r *Router) ApplyRoutes(engine *gin.Engine) {
 	pingController.ApplyRoutes(pings)
 
 	boards := engine.Group("boards")
-	boardsController := controllers.NewBoardsController(r.boardRepo)
+	boardsController := controllers.NewBoardController(operations.NewBoardOperations(r.boardRepo))
 	boardsController.ApplyRoutes(boards)
 }

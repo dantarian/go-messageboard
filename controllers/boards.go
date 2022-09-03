@@ -6,33 +6,32 @@ import (
 	"net/http"
 	"pencethren/go-messageboard/entities"
 	"pencethren/go-messageboard/operations"
-	"pencethren/go-messageboard/repositories"
 	"pencethren/go-messageboard/util"
 
 	"github.com/gin-gonic/gin"
 )
 
 type BoardController struct {
-	ops    operations.BoardOperations
+	ops    operations.IBoardOperations
 	logger *util.ApplicationLogger
 }
 
 type CreateBoardRequest struct {
-	Name        string `json:"name"`
+	Name        string `json:"name" binding:"required"`
 	Description string `json:"description"`
 }
 
-func NewBoardsController(repository repositories.IBoardRepository) BoardController {
-	return BoardController{ops: operations.NewBoardOperations(repository), logger: util.NewLogger()}
+func NewBoardController(ops operations.IBoardOperations) BoardController {
+	return BoardController{ops: ops, logger: util.NewLogger()}
 }
 
 func (bc *BoardController) PostBoard(ctx *gin.Context) {
 	var json CreateBoardRequest
 	if err := ctx.ShouldBindJSON(&json); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
+		bc.logger.Error().Err(err).Msg("failed to parse request body")
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"error": "failed to parse request body",
 		})
-		bc.logger.Error().Err(err).Msg("failed to parse request body")
 		return
 	}
 
@@ -58,7 +57,7 @@ func (bc *BoardController) PostBoard(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"message": result,
+		"id": result,
 	})
 }
 

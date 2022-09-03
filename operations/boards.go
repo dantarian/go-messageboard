@@ -8,6 +8,10 @@ import (
 	"pencethren/go-messageboard/util"
 )
 
+type IBoardOperations interface {
+	CreateBoard(name, description string) (string, error)
+}
+
 type BoardOperations struct {
 	boardsRepo repositories.IBoardRepository
 	logger     *util.ApplicationLogger
