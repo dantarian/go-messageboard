@@ -2,11 +2,28 @@ package controllers
 
 import (
 	"net/http"
+	"pencethren/go-messageboard/adapters"
 	"pencethren/go-messageboard/operations"
 	"pencethren/go-messageboard/repositories"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/render"
 )
+
+type PingPostResponse struct {
+	Message string `json:"message"`
+}
+
+func (ppr *PingPostResponse) Render(w http.ResponseWriter, r *http.Request) error {
+	return nil
+}
+
+type PingGetResponse struct {
+	Total int `json:"total"`
+}
+
+func (ppr *PingGetResponse) Render(w http.ResponseWriter, r *http.Request) error {
+	return nil
+}
 
 type PingsController struct {
 	repository repositories.IPingRepository
@@ -16,21 +33,21 @@ func NewPingsController(repository repositories.IPingRepository) PingsController
 	return PingsController{repository: repository}
 }
 
-func (p *PingsController) PostPing(ctx *gin.Context) {
+func (p *PingsController) PostPing(w http.ResponseWriter, r *http.Request) {
 	result := operations.RespondToPing(p.repository)
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": result,
-	})
+	render.Status(r, http.StatusOK)
+	if err := render.Render(w, r, &PingPostResponse{Message: result}); err != nil {
+		adapters.RenderError(w, r, err, http.StatusInternalServerError)
+		return
+	}
 }
 
-func (p *PingsController) GetPings(ctx *gin.Context) {
+func (p *PingsController) GetPings(w http.ResponseWriter, r *http.Request) {
 	total := operations.CountPingsReceived(p.repository)
-	ctx.JSON(http.StatusOK, gin.H{
-		"total": total,
-	})
-}
 
-func (p *PingsController) ApplyRoutes(router gin.IRoutes) {
-	router.POST("/", p.PostPing)
-	router.GET("/", p.GetPings)
+	render.Status(r, http.StatusOK)
+	if err := render.Render(w, r, &PingGetResponse{Total: total}); err != nil {
+		adapters.RenderError(w, r, err, http.StatusInternalServerError)
+		return
+	}
 }

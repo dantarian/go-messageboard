@@ -2,20 +2,28 @@ package server
 
 import (
 	"fmt"
+	"net/http"
 	"pencethren/go-messageboard/api"
 	"pencethren/go-messageboard/config"
 	"pencethren/go-messageboard/data"
+	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 type Server struct {
 	config *config.Config
-	router *gin.Engine
+	router *chi.Mux
 }
 
 func NewServer(config *config.Config) *Server {
-	router := gin.Default()
+	router := chi.NewRouter()
+	router.Use(middleware.RequestID)
+	router.Use(middleware.RealIP)
+	router.Use(middleware.Logger)
+	router.Use(middleware.Recoverer)
+	router.Use(middleware.Timeout(60 * time.Second))
 
 	pingRepo := data.NewInMemoryPingRepository()
 	boardRepo := data.NewInMemoryBoardRepository()
@@ -27,7 +35,7 @@ func NewServer(config *config.Config) *Server {
 }
 
 func (s *Server) Run() {
-	if err := s.router.Run(fmt.Sprintf(":%d", s.config.Server.Port)); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf(":%d", s.config.Server.Port), s.router); err != nil {
 		panic(fmt.Errorf("failed to start server: %w", err))
 	}
 }
