@@ -33,31 +33,3 @@ func NewDefaultBoardRepoMock() *BoardRepoMock {
 		existsWithName: func(name string) (bool, error) { return false, nil },
 	}
 }
-
-type PingRepoMock struct {
-	add   func(entities.Ping)
-	count func() int
-}
-
-func (pr *PingRepoMock) SetAdd(f func(entities.Ping)) {
-	pr.add = f
-}
-
-func (pr *PingRepoMock) SetCount(f func() int) {
-	pr.count = f
-}
-
-func (pr *PingRepoMock) Add(p entities.Ping) {
-	pr.add(p)
-}
-
-func (pr *PingRepoMock) Count() int {
-	return pr.count()
-}
-
-func NewDefaultPingRepoMock() *PingRepoMock {
-	return &PingRepoMock{
-		add:   func(_ entities.Ping) {},
-		count: func() int { return 0 },
-	}
-}

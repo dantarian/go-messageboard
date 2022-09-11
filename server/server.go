@@ -25,10 +25,9 @@ func NewServer(config *config.Config) *Server {
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.Timeout(60 * time.Second))
 
-	pingRepo := data.NewInMemoryPingRepository()
 	boardRepo := data.NewInMemoryBoardRepository()
 
-	apiRouter := api.NewRouter(pingRepo, boardRepo)
+	apiRouter := api.NewRouter(boardRepo)
 	apiRouter.ApplyRoutes(router)
 
 	return &Server{config, router}

@@ -11,8 +11,7 @@ import (
 // Tests that applying routes to a router doesn't crash and burn.
 func TestApplyRoutes(t *testing.T) {
 	boardRepo := repositories.NewDefaultBoardRepoMock()
-	pingRepo := repositories.NewDefaultPingRepoMock()
-	router := api.NewRouter(pingRepo, boardRepo)
+	router := api.NewRouter(boardRepo)
 
 	defer func() {
 		if r := recover(); r != nil {
