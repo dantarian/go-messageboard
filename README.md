@@ -51,7 +51,8 @@ require for data persistence (found in the `repositories` folder).
 
 At the third layer, we have the controller code that marshalls inputs, invokes
 the use cases in the Operations layer, and shapes the responses to the user.
-This code can be found in the `controllers` folder.
+This code can be found in the `controllers` folder. This is supported by the
+`adapters` code, which handles binding requests and rendering responses.
 
 ### Frameworks Layers
 

@@ -4,15 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"pencethren/go-messageboard/controllers"
 	"pencethren/go-messageboard/entities"
 	"pencethren/go-messageboard/operations"
+	"strings"
 	"testing"
-
-	"github.com/gin-gonic/gin"
 )
 
 type boardOpsMock struct {
@@ -29,27 +27,20 @@ func newDefaultBoardOpsMock() *boardOpsMock {
 	}
 }
 
-func newTestContext() (*httptest.ResponseRecorder, *gin.Context) {
-	testRecorder := httptest.NewRecorder()
-	ctx, _ := gin.CreateTestContext(testRecorder)
-
-	ctx.Request = &http.Request{
-		Header: make(http.Header),
+func newRequest(method string, url string, body map[string]interface{}) (*http.Request, error) {
+	var bytes = new(bytes.Buffer)
+	if err := json.NewEncoder(bytes).Encode(body); err != nil {
+		return nil, err
 	}
 
-	return testRecorder, ctx
-}
-
-func mockJsonPost(ctx *gin.Context, content interface{}) {
-	ctx.Request.Method = "POST"
-	ctx.Request.Header.Set("Content-Type", "application/json")
-
-	jsonbytes, err := json.Marshal(content)
+	req, err := http.NewRequest(method, url, bytes)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	ctx.Request.Body = io.NopCloser(bytes.NewBuffer(jsonbytes))
+	req.Header.Set("Content-Type", "application/json")
+
+	return req, nil
 }
 
 func TestCreateBoardController(t *testing.T) {
@@ -63,7 +54,7 @@ func TestCreateBoardController(t *testing.T) {
 		"success": {
 			map[string]interface{}{"name": "name", "description": "description"},
 			func(_, _ string) (string, error) { return "id", nil },
-			http.StatusOK,
+			http.StatusCreated,
 			"{\"id\":\"id\"}",
 		},
 		"validation failure": {
@@ -71,7 +62,7 @@ func TestCreateBoardController(t *testing.T) {
 			func(_, _ string) (string, error) {
 				return "", &entities.ValidationError{Msg: "validation error"}
 			},
-			http.StatusUnprocessableEntity,
+			http.StatusBadRequest,
 			"{\"error\":\"validation error: \"}",
 		},
 		"business rule failure": {
@@ -79,7 +70,7 @@ func TestCreateBoardController(t *testing.T) {
 			func(_, _ string) (string, error) {
 				return "", &operations.BusinessRuleError{Msg: "business rule error"}
 			},
-			http.StatusUnprocessableEntity,
+			http.StatusConflict,
 			"{\"error\":\"business rule error: \"}",
 		},
 		"internal server error": {
@@ -92,7 +83,7 @@ func TestCreateBoardController(t *testing.T) {
 			map[string]interface{}{"foo": "name", "bar": "description"},
 			func(_, _ string) (string, error) { return "", nil },
 			http.StatusBadRequest,
-			"{\"error\":\"failed to parse request body\"}",
+			"{\"error\":\"name is required\"}",
 		},
 	}
 
@@ -100,14 +91,18 @@ func TestCreateBoardController(t *testing.T) {
 		t.Run(scenario, func(t *testing.T) {
 			boardsOps := newDefaultBoardOpsMock()
 			boardsOps.createBoard = testSpec.createBoardOp
-			recorder, ctx := newTestContext()
 
-			mockJsonPost(ctx, testSpec.requestBody)
+			req, err := newRequest("POST", "/boards", testSpec.requestBody)
+			if err != nil {
+				t.Errorf("Failed to create request: %v", err)
+			}
 
+			recorder := httptest.NewRecorder()
 			controller := controllers.NewBoardController(boardsOps)
-			controller.PostBoard(ctx)
+			handler := http.HandlerFunc(controller.PostBoard)
+			handler.ServeHTTP(recorder, req)
 
-			body := recorder.Body.String()
+			body := strings.Trim(recorder.Body.String(), " \n")
 
 			if recorder.Code != testSpec.expectedStatus || body != testSpec.expectedBody {
 				t.Errorf("expected { status: %v, body: %v }, got { status: %v, body: %v }",

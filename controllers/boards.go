@@ -2,13 +2,11 @@ package controllers
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
+	"pencethren/go-messageboard/adapters"
 	"pencethren/go-messageboard/entities"
 	"pencethren/go-messageboard/operations"
 	"pencethren/go-messageboard/util"
-
-	"github.com/gin-gonic/gin"
 )
 
 type BoardController struct {
@@ -16,51 +14,32 @@ type BoardController struct {
 	logger *util.ApplicationLogger
 }
 
-type CreateBoardRequest struct {
-	Name        string `json:"name" binding:"required"`
-	Description string `json:"description"`
-}
-
 func NewBoardController(ops operations.IBoardOperations) BoardController {
 	return BoardController{ops: ops, logger: util.NewLogger()}
 }
 
-func (bc *BoardController) PostBoard(ctx *gin.Context) {
-	var json CreateBoardRequest
-	if err := ctx.ShouldBindJSON(&json); err != nil {
+func (bc *BoardController) PostBoard(w http.ResponseWriter, r *http.Request) {
+	board, err := adapters.NewCreateBoardRequest(r)
+	if err != nil {
 		bc.logger.Error().Err(err).Msg("failed to parse request body")
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error": "failed to parse request body",
-		})
+		adapters.RenderError(w, r, err, http.StatusBadRequest)
 		return
 	}
 
-	result, err := bc.ops.CreateBoard(json.Name, json.Description)
+	result, err := bc.ops.CreateBoard(board.Name, board.Description)
 	if err != nil {
 		var validationError *entities.ValidationError
 		var businessRuleError *operations.BusinessRuleError
 		switch {
 		case errors.As(err, &validationError):
-			ctx.JSON(http.StatusUnprocessableEntity, gin.H{
-				"error": fmt.Sprintf("%v", validationError),
-			})
+			adapters.RenderError(w, r, err, http.StatusBadRequest)
 		case errors.As(err, &businessRuleError):
-			ctx.JSON(http.StatusUnprocessableEntity, gin.H{
-				"error": fmt.Sprintf("%v", businessRuleError),
-			})
+			adapters.RenderError(w, r, err, http.StatusConflict)
 		default:
-			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"error": fmt.Sprintf("%v", err),
-			})
+			adapters.RenderError(w, r, err, http.StatusInternalServerError)
 		}
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"id": result,
-	})
-}
-
-func (bc *BoardController) ApplyRoutes(router gin.IRoutes) {
-	router.POST("/", bc.PostBoard)
+	adapters.RenderCreateBoardResponse(w, r, result)
 }
