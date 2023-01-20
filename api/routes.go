@@ -1,23 +1,23 @@
 package api
 
 import (
-	"pencethren/go-messageboard/controllers"
-	"pencethren/go-messageboard/operations"
-	"pencethren/go-messageboard/repositories"
+	"pencethren/go-messageboard/controller"
+	"pencethren/go-messageboard/operation"
+	"pencethren/go-messageboard/repository"
 
 	"github.com/go-chi/chi/v5"
 )
 
 type Router struct {
-	boardRepo repositories.IBoardRepository
+	boardRepo repository.IBoardRepository
 }
 
-func NewRouter(boardsRepo repositories.IBoardRepository) *Router {
+func NewRouter(boardsRepo repository.IBoardRepository) *Router {
 	return &Router{boardsRepo}
 }
 
 func (r *Router) ApplyRoutes(chiRouter chi.Router) {
-	boardController := controllers.NewBoardController(operations.NewBoardOperations(r.boardRepo))
+	boardController := controller.NewBoardController(operation.NewBoardOperations(r.boardRepo))
 
 	chiRouter.Route("/boards", func(r chi.Router) {
 		r.Post("/", boardController.PostBoard)

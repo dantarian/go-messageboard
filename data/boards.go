@@ -1,24 +1,36 @@
 package data
 
 import (
-	"pencethren/go-messageboard/entities"
-	"pencethren/go-messageboard/repositories"
+	"pencethren/go-messageboard/entity"
+	"pencethren/go-messageboard/repository"
 
 	"github.com/google/uuid"
 )
 
 type inMemoryBoardRepository struct {
-	boards []entities.Board
+	boards []entity.Board
 }
 
-func NewInMemoryBoardRepository() repositories.IBoardRepository {
+func NewInMemoryBoardRepository() repository.IBoardRepository {
 	return &inMemoryBoardRepository{}
 }
 
-func (r *inMemoryBoardRepository) Add(board *entities.Board) (uuid.UUID, error) {
+func (r *inMemoryBoardRepository) Add(board *entity.Board) (uuid.UUID, error) {
 	newBoard := *board
 	r.boards = append(r.boards, newBoard)
 	return newBoard.Id, nil
+}
+
+func (r *inMemoryBoardRepository) List(pageSize int, filter *entity.BoardSearch) ([]*entity.BoardSummary, error) {
+	boards := []*entity.BoardSummary{}
+	for _, board := range r.boards {
+		boards = append(boards, &entity.BoardSummary{
+			Id:    board.Id,
+			Name:  board.Name,
+			State: board.State,
+		})
+	}
+	return boards, nil
 }
 
 func (r *inMemoryBoardRepository) ExistsWithName(name string) (bool, error) {

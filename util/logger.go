@@ -29,6 +29,10 @@ func (al *ApplicationLogger) FailedToPersistBoard(context string, err error) {
 	al.Error().Str("context", context).Err(err).Msg("failed to persist board")
 }
 
+func (al *ApplicationLogger) FailedToListBoards(context string, err error) {
+	al.Error().Str("context", context).Err(err).Msg("failed to list boards")
+}
+
 func (al *ApplicationLogger) DuplicateBoardName(context string, name string) {
 	al.Info().Str("context", context).Str("name", name).Msg("duplicate board name")
 }

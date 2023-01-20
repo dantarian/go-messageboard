@@ -1,4 +1,4 @@
-package controllers_test
+package controller_test
 
 import (
 	"bytes"
@@ -6,9 +6,9 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
-	"pencethren/go-messageboard/controllers"
-	"pencethren/go-messageboard/entities"
-	"pencethren/go-messageboard/operations"
+	"pencethren/go-messageboard/controller"
+	"pencethren/go-messageboard/entity"
+	"pencethren/go-messageboard/operation"
 	"strings"
 	"testing"
 )
@@ -60,7 +60,7 @@ func TestCreateBoardController(t *testing.T) {
 		"validation failure": {
 			map[string]interface{}{"name": "name", "description": "description"},
 			func(_, _ string) (string, error) {
-				return "", &entities.ValidationError{Msg: "validation error"}
+				return "", &entity.ValidationError{Msg: "validation error"}
 			},
 			http.StatusBadRequest,
 			"{\"error\":\"validation error: \"}",
@@ -68,7 +68,7 @@ func TestCreateBoardController(t *testing.T) {
 		"business rule failure": {
 			map[string]interface{}{"name": "name", "description": "description"},
 			func(_, _ string) (string, error) {
-				return "", &operations.BusinessRuleError{Msg: "business rule error"}
+				return "", &operation.BusinessRuleError{Msg: "business rule error"}
 			},
 			http.StatusConflict,
 			"{\"error\":\"business rule error: \"}",
@@ -98,7 +98,7 @@ func TestCreateBoardController(t *testing.T) {
 			}
 
 			recorder := httptest.NewRecorder()
-			controller := controllers.NewBoardController(boardsOps)
+			controller := controller.NewBoardController(boardsOps)
 			handler := http.HandlerFunc(controller.PostBoard)
 			handler.ServeHTTP(recorder, req)
 

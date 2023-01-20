@@ -1,10 +1,10 @@
-package operations_test
+package operation_test
 
 import (
 	"errors"
-	"pencethren/go-messageboard/entities"
-	"pencethren/go-messageboard/operations"
-	"pencethren/go-messageboard/repositories"
+	"pencethren/go-messageboard/entity"
+	"pencethren/go-messageboard/operation"
+	"pencethren/go-messageboard/repository"
 	"testing"
 
 	"github.com/google/uuid"
@@ -27,9 +27,9 @@ func TestCreateBoard(t *testing.T) {
 }
 
 func testCreateBoardInvalidParams(t *testing.T) {
-	boardsRepo := repositories.NewDefaultBoardRepoMock()
+	boardsRepo := repository.NewDefaultBoardRepoMock()
 	expectedError := "invalid board: name cannot be empty"
-	ops := operations.NewBoardOperations(boardsRepo)
+	ops := operation.NewBoardOperations(boardsRepo)
 	id, err := ops.CreateBoard("", "description")
 
 	if id != "" || err == nil || err.Error() != expectedError {
@@ -38,10 +38,10 @@ func testCreateBoardInvalidParams(t *testing.T) {
 }
 
 func testCreateBoardNameClashCheckError(t *testing.T) {
-	boardsRepo := repositories.NewDefaultBoardRepoMock()
+	boardsRepo := repository.NewDefaultBoardRepoMock()
 	boardsRepo.SetExistsWithName(func(name string) (bool, error) { return false, errors.New("db error") })
 	expectedError := "persistence error"
-	ops := operations.NewBoardOperations(boardsRepo)
+	ops := operation.NewBoardOperations(boardsRepo)
 	id, err := ops.CreateBoard("name", "description")
 
 	if id != "" || err == nil || err.Error() != expectedError {
@@ -50,10 +50,10 @@ func testCreateBoardNameClashCheckError(t *testing.T) {
 }
 
 func testCreateBoardNameClash(t *testing.T) {
-	boardsRepo := repositories.NewDefaultBoardRepoMock()
+	boardsRepo := repository.NewDefaultBoardRepoMock()
 	boardsRepo.SetExistsWithName(func(name string) (bool, error) { return true, nil })
 	expectedError := "invalid data: a board named 'name' already exists"
-	ops := operations.NewBoardOperations(boardsRepo)
+	ops := operation.NewBoardOperations(boardsRepo)
 	id, err := ops.CreateBoard("name", "description")
 
 	if id != "" || err == nil || err.Error() != expectedError {
@@ -62,10 +62,10 @@ func testCreateBoardNameClash(t *testing.T) {
 }
 
 func testCreateBoardFailsToPersist(t *testing.T) {
-	boardsRepo := repositories.NewDefaultBoardRepoMock()
-	boardsRepo.SetAdd(func(board *entities.Board) (uuid.UUID, error) { return uuid.Nil, errors.New("db error") })
+	boardsRepo := repository.NewDefaultBoardRepoMock()
+	boardsRepo.SetAdd(func(board *entity.Board) (uuid.UUID, error) { return uuid.Nil, errors.New("db error") })
 	expectedError := "persistence error"
-	ops := operations.NewBoardOperations(boardsRepo)
+	ops := operation.NewBoardOperations(boardsRepo)
 	id, err := ops.CreateBoard("name", "description")
 
 	if id != "" || err == nil || err.Error() != expectedError {
@@ -75,9 +75,9 @@ func testCreateBoardFailsToPersist(t *testing.T) {
 
 func testCreateBoardSuccess(t *testing.T) {
 	expectedId := uuid.New()
-	boardsRepo := repositories.NewDefaultBoardRepoMock()
-	boardsRepo.SetAdd(func(board *entities.Board) (uuid.UUID, error) { return expectedId, nil })
-	ops := operations.NewBoardOperations(boardsRepo)
+	boardsRepo := repository.NewDefaultBoardRepoMock()
+	boardsRepo.SetAdd(func(board *entity.Board) (uuid.UUID, error) { return expectedId, nil })
+	ops := operation.NewBoardOperations(boardsRepo)
 	id, err := ops.CreateBoard("name", "description")
 
 	if id != expectedId.String() || err != nil {
