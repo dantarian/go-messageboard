@@ -1,6 +1,7 @@
 package data
 
 import (
+	"fmt"
 	"pencethren/go-messageboard/entity"
 	"pencethren/go-messageboard/repository"
 
@@ -23,12 +24,39 @@ func (r *inMemoryBoardRepository) Add(board *entity.Board) (uuid.UUID, error) {
 
 func (r *inMemoryBoardRepository) List(pageSize int, filter *entity.BoardSearch) ([]*entity.BoardSummary, error) {
 	boards := []*entity.BoardSummary{}
-	for _, board := range r.boards {
-		boards = append(boards, &entity.BoardSummary{
-			Id:    board.Id,
-			Name:  board.Name,
-			State: board.State,
-		})
+
+	if len(r.boards) == 0 {
+		return boards, nil
+	}
+
+	start := 0
+
+	if filter.Bookmark != "" {
+		found := false
+		for idx, board := range r.boards {
+			if board.Name == filter.Bookmark {
+				start = idx
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return boards, fmt.Errorf("bookmark not found: %v", filter.Bookmark)
+		}
+	}
+
+	for _, board := range r.boards[start:] {
+		if board.State == filter.State {
+			boards = append(boards, &entity.BoardSummary{
+				Id:    board.Id,
+				Name:  board.Name,
+				State: board.State,
+			})
+		}
+		if len(boards) == pageSize+1 {
+			break
+		}
 	}
 	return boards, nil
 }

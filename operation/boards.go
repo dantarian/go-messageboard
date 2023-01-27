@@ -10,6 +10,7 @@ import (
 
 type IBoardOperations interface {
 	CreateBoard(name, description string) (string, error)
+	ListBoards(filter *entity.BoardSearch) ([]*entity.BoardSummary, string, error)
 }
 
 type BoardOperations struct {
@@ -25,7 +26,7 @@ func (ops BoardOperations) CreateBoard(name, description string) (string, error)
 	logContext := "BoardOperations.CreateBoard"
 
 	// Validate
-	board, err := entity.NewBoard(name, description, entity.BoardOpen)
+	board, err := entity.NewBoard(name, description, entity.BoardStateOpen)
 	if err != nil {
 		ops.logger.FailedToInstantiateBoard(logContext, err)
 		return "", err
@@ -52,8 +53,8 @@ func (ops BoardOperations) CreateBoard(name, description string) (string, error)
 	return fmt.Sprint(id), nil
 }
 
-func (ops BoardOperations) ListOpenBoards(filter *entity.BoardSearch) ([]*entity.BoardSummary, string, error) {
-	logContext := "BoardOperation.ListOpenBoards"
+func (ops BoardOperations) ListBoards(filter *entity.BoardSearch) ([]*entity.BoardSummary, string, error) {
+	logContext := "BoardOperation.ListBoards"
 	pageSize := 10
 
 	boards, err := ops.boardsRepo.List(pageSize, filter)
@@ -64,33 +65,12 @@ func (ops BoardOperations) ListOpenBoards(filter *entity.BoardSearch) ([]*entity
 
 	bookmark := ""
 	if len(boards) > pageSize {
-		bookmark = boards[pageSize-1].Name
-	}
-
-	if filter.Order == entity.Descending {
-		size := pageSize
-		if len(boards) < pageSize {
-			size = len(boards)
-		}
-		boards = reverse(boards[:size])
+		bookmark = boards[pageSize].Name
+		boards = boards[:pageSize]
 	}
 
 	return boards, bookmark, nil
 }
-
-func reverse[T any](original []T) (reversed []T) {
-	reversed = make([]T, len(original))
-	copy(reversed, original)
-
-	for i := len(reversed)/2 - 1; i >= 0; i-- {
-		tmp := len(reversed) - 1 - i
-		reversed[i], reversed[tmp] = reversed[tmp], reversed[i]
-	}
-
-	return
-}
-
-func ListClosedBoards() {}
 
 func OpenBoard() {}
 

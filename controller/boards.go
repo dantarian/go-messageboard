@@ -43,3 +43,28 @@ func (bc *BoardController) PostBoard(w http.ResponseWriter, r *http.Request) {
 
 	adapter.RenderCreateBoardResponse(w, r, result)
 }
+
+func (bc *BoardController) GetBoards(w http.ResponseWriter, r *http.Request) {
+	state, err := entity.ParseBoardState(r.URL.Query().Get("state"))
+	if err != nil {
+		bc.logger.Error().Err(err).Msg("failed to parse query parameters")
+		adapter.RenderError(w, r, err, http.StatusBadRequest)
+		return
+	}
+
+	searchTerm := r.URL.Query().Get("search")
+	bookmark := r.URL.Query().Get("starting_from")
+
+	boardSearch := entity.NewBoardSearch().WithNameContaining(searchTerm).StartingFrom(bookmark)
+	if state == entity.BoardStateClosed {
+		boardSearch = boardSearch.Closed()
+	}
+
+	results, bookmark, err := bc.ops.ListBoards(boardSearch)
+	if err != nil {
+		adapter.RenderError(w, r, err, http.StatusInternalServerError)
+		return
+	}
+
+	adapter.RenderBoardsList(w, r, results, bookmark)
+}

@@ -15,15 +15,23 @@ import (
 
 type boardOpsMock struct {
 	createBoard func(string, string) (string, error)
+	listBoards  func(*entity.BoardSearch) ([]*entity.BoardSummary, string, error)
 }
 
 func (ops *boardOpsMock) CreateBoard(name, description string) (string, error) {
 	return ops.createBoard(name, description)
 }
 
+func (ops *boardOpsMock) ListBoards(filter *entity.BoardSearch) ([]*entity.BoardSummary, string, error) {
+	return ops.listBoards(filter)
+}
+
 func newDefaultBoardOpsMock() *boardOpsMock {
 	return &boardOpsMock{
 		createBoard: func(name, description string) (string, error) { return "id", nil },
+		listBoards: func(filter *entity.BoardSearch) ([]*entity.BoardSummary, string, error) {
+			return []*entity.BoardSummary{}, "", nil
+		},
 	}
 }
 

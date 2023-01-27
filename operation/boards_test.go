@@ -2,6 +2,7 @@ package operation_test
 
 import (
 	"errors"
+	"fmt"
 	"pencethren/go-messageboard/entity"
 	"pencethren/go-messageboard/operation"
 	"pencethren/go-messageboard/repository"
@@ -17,6 +18,21 @@ func TestCreateBoard(t *testing.T) {
 		"finds name clash":              testCreateBoardNameClash,
 		"fails to persist board":        testCreateBoardFailsToPersist,
 		"success":                       testCreateBoardSuccess,
+	}
+
+	for scenario, test := range tests {
+		t.Run(scenario, func(t *testing.T) {
+			test(t)
+		})
+	}
+}
+
+func TestListBoards(t *testing.T) {
+	tests := map[string]func(t *testing.T){
+		"fails to retrieve boards":     testListBoardsFailsToRead,
+		"no boards available":          testListBoardsEmptyList,
+		"fewer than _pageSize_ boards": testListBoardsSmallList,
+		"more than _pageSize_ boards":  testListBoardsLargeList,
 	}
 
 	for scenario, test := range tests {
@@ -82,5 +98,74 @@ func testCreateBoardSuccess(t *testing.T) {
 
 	if id != expectedId.String() || err != nil {
 		t.Errorf("expected (\"%v\", nil), got (\"%v\", \"%v\")", expectedId, id, err)
+	}
+}
+
+func testListBoardsFailsToRead(t *testing.T) {
+	boardsRepo := repository.NewDefaultBoardRepoMock()
+	boardsRepo.SetList(func(i int, bs *entity.BoardSearch) ([]*entity.BoardSummary, error) {
+		return []*entity.BoardSummary{}, errors.New("db error")
+	})
+	expectedError := "data access error"
+	ops := operation.NewBoardOperations(boardsRepo)
+	list, bookmark, err := ops.ListBoards(&entity.BoardSearch{})
+
+	if len(list) != 0 || bookmark != "" || err.Error() != expectedError {
+		t.Errorf("expected ([], \"\", \"%v\"), got (%v, \"%v\", \"%v\")", expectedError, list, bookmark, err)
+	}
+}
+
+func testListBoardsEmptyList(t *testing.T) {
+	boardsRepo := repository.NewDefaultBoardRepoMock()
+	boardsRepo.SetList(func(i int, bs *entity.BoardSearch) ([]*entity.BoardSummary, error) {
+		return []*entity.BoardSummary{}, nil
+	})
+	ops := operation.NewBoardOperations(boardsRepo)
+	list, bookmark, err := ops.ListBoards(&entity.BoardSearch{})
+
+	if len(list) != 0 || bookmark != "" || err != nil {
+		t.Errorf("expected ([], \"\", nil), got (%v, \"%v\", \"%v\")", list, bookmark, err)
+	}
+}
+
+func testListBoardsSmallList(t *testing.T) {
+	boardsRepo := repository.NewDefaultBoardRepoMock()
+	boardsRepo.SetList(func(i int, bs *entity.BoardSearch) ([]*entity.BoardSummary, error) {
+		return []*entity.BoardSummary{
+			{
+				Id:    uuid.New(),
+				Name:  "Test board",
+				State: entity.BoardStateOpen,
+			},
+		}, nil
+	})
+	ops := operation.NewBoardOperations(boardsRepo)
+	list, bookmark, err := ops.ListBoards(&entity.BoardSearch{})
+
+	if len(list) != 1 || bookmark != "" || err != nil {
+		t.Errorf("expected ([<Test board>], \"\", nil), got (%v, \"%v\", \"%v\")", list, bookmark, err)
+	}
+}
+
+func testListBoardsLargeList(t *testing.T) {
+	boardsRepo := repository.NewDefaultBoardRepoMock()
+	boardsRepo.SetList(func(i int, bs *entity.BoardSearch) ([]*entity.BoardSummary, error) {
+		boards := []*entity.BoardSummary{}
+
+		for i := 0; i < 11; i++ {
+			boards = append(boards, &entity.BoardSummary{
+				Id:    uuid.New(),
+				Name:  fmt.Sprintf("Test board %v", i),
+				State: entity.BoardStateOpen,
+			})
+		}
+
+		return boards, nil
+	})
+	ops := operation.NewBoardOperations(boardsRepo)
+	list, bookmark, err := ops.ListBoards(&entity.BoardSearch{})
+
+	if len(list) != 10 || bookmark != "Test board 11" || err != nil {
+		t.Errorf("expected ([<Test board 1>, ..., <Test board 10>], \"Test board 11\", nil), got (%v, \"%v\", \"%v\")", list, bookmark, err)
 	}
 }

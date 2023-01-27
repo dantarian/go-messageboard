@@ -1,22 +1,32 @@
 package entity
 
 import (
+	"fmt"
+
 	"github.com/google/uuid"
 )
 
 type BoardState int64
 
 const (
-	BoardClosed BoardState = iota
-	BoardOpen
+	BoardStateClosed BoardState = iota
+	BoardStateOpen
 )
 
-type SortOrder int64
+func (bs BoardState) String() string {
+	return []string{"closed", "open"}[bs]
+}
 
-const (
-	Ascending SortOrder = iota
-	Descending
-)
+func ParseBoardState(s string) (BoardState, error) {
+	switch s {
+	case "closed":
+		return BoardStateClosed, nil
+	case "open":
+		return BoardStateOpen, nil
+	default:
+		return BoardStateClosed, fmt.Errorf("unrecognised board state: %s", s)
+	}
+}
 
 type BoardSummary struct {
 	Id    uuid.UUID
@@ -32,7 +42,6 @@ type Board struct {
 type BoardSearch struct {
 	SearchTerm string
 	State      BoardState
-	Order      SortOrder
 	Bookmark   string
 }
 
@@ -62,7 +71,7 @@ func (b *Board) Validate() error {
 }
 
 func NewBoardSearch() *BoardSearch {
-	return &BoardSearch{State: BoardOpen, Order: Ascending}
+	return &BoardSearch{State: BoardStateOpen}
 }
 
 func (boardSearch *BoardSearch) WithNameContaining(term string) *BoardSearch {
@@ -71,12 +80,7 @@ func (boardSearch *BoardSearch) WithNameContaining(term string) *BoardSearch {
 }
 
 func (boardSearch *BoardSearch) Closed() *BoardSearch {
-	boardSearch.State = BoardClosed
-	return boardSearch
-}
-
-func (boardSearch *BoardSearch) Descending() *BoardSearch {
-	boardSearch.Order = Descending
+	boardSearch.State = BoardStateClosed
 	return boardSearch
 }
 

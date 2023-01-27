@@ -3,6 +3,7 @@ package adapter
 import (
 	"errors"
 	"net/http"
+	"pencethren/go-messageboard/entity"
 
 	"github.com/go-chi/render"
 )
@@ -40,4 +41,42 @@ func (res *CreateBoardResponse) Render(w http.ResponseWriter, r *http.Request) e
 
 func RenderCreateBoardResponse(w http.ResponseWriter, r *http.Request, id string) {
 	_ = render.Render(w, r, &CreateBoardResponse{Id: id})
+}
+
+type BoardSummary struct {
+	Id    string `json:"id" binding:"required"`
+	Name  string `json:"name"`
+	State string `json:"state"`
+}
+
+type ListBoardsResponse struct {
+	Boards []BoardSummary `json:"boards"`
+	Next   string         `json:"next"`
+}
+
+func (res *ListBoardsResponse) Render(w http.ResponseWriter, r *http.Request) error {
+	render.Status(r, http.StatusOK)
+	return nil
+}
+
+func RenderBoardsList(w http.ResponseWriter, r *http.Request, list []*entity.BoardSummary, bookmark string) {
+	summaries := []BoardSummary{}
+	for _, summary := range list {
+		summaries = append(summaries, BoardSummary{
+			Id:    summary.Id.String(),
+			Name:  summary.Name,
+			State: summary.State.String(),
+		})
+	}
+
+	url := ""
+	if bookmark != "" {
+		newUrl := *r.URL
+		query := newUrl.Query()
+		query.Set("starting_from", bookmark)
+		newUrl.RawQuery = query.Encode()
+		url = newUrl.String()
+	}
+
+	_ = render.Render(w, r, &ListBoardsResponse{summaries, url})
 }

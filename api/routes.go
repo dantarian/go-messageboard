@@ -21,5 +21,6 @@ func (r *Router) ApplyRoutes(chiRouter chi.Router) {
 
 	chiRouter.Route("/boards", func(r chi.Router) {
 		r.Post("/", boardController.PostBoard)
+		r.Get("/", boardController.GetBoards)
 	})
 }
