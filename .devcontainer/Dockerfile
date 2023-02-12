@@ -16,5 +16,6 @@ RUN cp -r /root/. /home/${USERNAME} \
   && chmod a+rx /usr/local/bin/*
 RUN sed -i -e s/root/home\\/${USERNAME}/ /home/${USERNAME}/.zshrc
 RUN apk add --no-cache make
+COPY fix-snyk.sh /usr/local/bin/fix-snyk
 
 USER ${USERNAME}
