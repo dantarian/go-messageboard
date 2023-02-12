@@ -15,5 +15,6 @@ RUN cp -r /root/. /home/${USERNAME} \
   && chown -R ${USER_UID}:${USER_GID} /go \
   && chmod a+rx /usr/local/bin/*
 RUN sed -i -e s/root/home\\/${USERNAME}/ /home/${USERNAME}/.zshrc
+RUN apk add --no-cache make
 
 USER ${USERNAME}

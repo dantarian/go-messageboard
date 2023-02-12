@@ -21,3 +21,6 @@ go.work
 
 # Snyk Code cache file
 .dccache
+
+# Binary tools
+.bin/

@@ -29,7 +29,8 @@
         "IBM.output-colorizer", // Colorize your output/test logs
         "humao.rest-client", // HTTP client in VSCode
         "snyk-security.snyk-vulnerability-scanner", // Snyk vulnerability checks
-        "ckolkman.vscode-postgres" // PostgreSQL client
+        "ckolkman.vscode-postgres", // PostgreSQL client
+        "ms-vscode.makefile-tools" // Makefile support
         // "mohsen1.prettify-json", // Prettify JSON data
         // "zxh404.vscode-proto3", // Supports Proto syntax
         // "jrebocho.vscode-random", // Generates random values
