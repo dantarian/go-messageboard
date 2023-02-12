@@ -10,7 +10,7 @@
         "database"
     ],
     "shutdownAction": "stopCompose",
-    "postCreateCommand": "~/.windows.sh && go mod download && go mod tidy",
+    "postCreateCommand": "go mod download && go mod tidy",
     "workspaceFolder": "/workspace",
     // "overrideCommand": "",
     "extensions": [
