@@ -1,2 +1,8 @@
 server:
   port: 8080
+
+database:
+  type: postgres
+  host: database
+  user: postgres
+  name: boards

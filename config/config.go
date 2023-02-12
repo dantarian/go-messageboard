@@ -12,7 +12,12 @@ type serverConfig struct {
 }
 
 type dbConfig struct {
-	Type string
+	Type     string
+	Host     string
+	Port     int
+	User     string
+	Password string
+	Name     string
 }
 
 type Config struct {
@@ -26,6 +31,10 @@ func NewConfig() (*Config, error) {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
+	viper.SetEnvPrefix("boards")
+	viper.SetEnvKeyReplacer(strings.NewReplacer(`.`, `_`))
+	viper.BindEnv("database.password")
+	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
@@ -49,14 +58,30 @@ func NewConfig() (*Config, error) {
 func defaults() {
 	viper.SetDefault("server.port", "8080")
 	viper.SetDefault("database.type", "memory")
+	viper.SetDefault("database.port", 5432)
 }
 
 func validate() error {
 	var errors []string
 
-	port := viper.GetInt("server.port")
-	if port < 1 || port > 65535 {
+	serverPort := viper.GetInt("server.port")
+	if serverPort < 1 || serverPort > 65535 {
 		errors = append(errors, "server.port must be in the range 1-65535")
+	}
+
+	databaseType := viper.GetString("database.type")
+	if databaseType != "memory" && databaseType != "postgres" {
+		errors = append(errors, "database.type must be one of 'memory' or 'postgres'")
+	}
+
+	databasePort := viper.GetInt("database.port")
+	if databaseType == "postgres" && (databasePort < 1 || databasePort > 65535) {
+		errors = append(errors, "database.port must be in range 1-65535")
+	}
+
+	databasePassword := viper.GetString("database.password")
+	if databaseType == "postgres" && databasePassword == "" {
+		errors = append(errors, "database.password must be supplied when database.type is 'postgres'")
 	}
 
 	if len(errors) > 0 {

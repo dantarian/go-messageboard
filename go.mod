@@ -3,10 +3,16 @@ module pencethren/go-messageboard
 go 1.18
 
 require (
+	github.com/friendsofgo/errors v0.9.2
 	github.com/go-chi/chi/v5 v5.0.7
+	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12
+	github.com/lib/pq v1.10.6
 	github.com/pressly/goose/v3 v3.9.0
 	github.com/spf13/viper v1.12.0
+	github.com/volatiletech/null/v8 v8.1.2
+	github.com/volatiletech/randomize v0.0.1
 	github.com/volatiletech/sqlboiler/v4 v4.14.1
+	github.com/volatiletech/strmangle v0.0.4
 )
 
 require (
@@ -19,8 +25,8 @@ require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/elastic/go-sysinfo v1.9.0 // indirect
 	github.com/elastic/go-windows v1.0.1 // indirect
-	github.com/friendsofgo/errors v0.9.2 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
+	github.com/gofrs/uuid v4.2.0+incompatible // indirect
 	github.com/golang-sql/civil v0.0.0-20220223132316-b832511892a9 // indirect
 	github.com/golang-sql/sqlexp v0.1.0 // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect
@@ -36,7 +42,6 @@ require (
 	github.com/jackc/pgx/v4 v4.17.2 // indirect
 	github.com/joeshaw/multierror v0.0.0-20140124173710-69b34d4ec901 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
-	github.com/lib/pq v1.10.6 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/paulmach/orb v0.7.1 // indirect
@@ -49,7 +54,6 @@ require (
 	github.com/spf13/cobra v1.5.0 // indirect
 	github.com/vertica/vertica-sql-go v1.3.1 // indirect
 	github.com/volatiletech/inflect v0.0.1 // indirect
-	github.com/volatiletech/strmangle v0.0.4 // indirect
 	github.com/ziutek/mymysql v1.5.4 // indirect
 	go.opentelemetry.io/otel v1.9.0 // indirect
 	go.opentelemetry.io/otel/trace v1.9.0 // indirect

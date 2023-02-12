@@ -16,6 +16,8 @@ generate: export PSQL_USER=${db_user}
 generate: export PSQL_PASS=${db_password}
 generate: export PSQL_SSLMODE=disable
 
+run: export BOARDS_DATABASE_PASSWORD=${db_password}
+
 .PHONY: install-tools
 install-tools: ## Install tooling defined in tools.go
 	mkdir -p ${GO_BIN}
