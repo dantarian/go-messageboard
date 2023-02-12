@@ -1,0 +1,11 @@
+###
+# @prompt boardName The name of the board
+# @prompt description A description for the board
+POST http://localhost:8080/boards
+Content-Type: application/json
+
+{
+  "name": "{{boardName}}",
+  "description": "{{description}}"
+}
+
