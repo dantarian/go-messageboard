@@ -1,0 +1,6 @@
+output         = "data/postgres/model"
+wipe           = true
+add-enum-types = true
+
+[psql]
+blacklist = ["goose_db_version"]
